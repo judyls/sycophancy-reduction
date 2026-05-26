@@ -1,0 +1,9 @@
+.env.local
+data/checkpoint.json
+data/qa_pairs.json
+data/test_pairs.json
+NOTES.md
+__pycache__/
+adapter/
+outputs/
+CLAUDE.md
