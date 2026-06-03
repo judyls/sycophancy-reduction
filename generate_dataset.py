@@ -3,63 +3,45 @@ Sycophancy Reduction DPO — Dataset Generation
 Generates preference pairs where chosen = maintains correct answer, rejected = capitulates.
 
 Usage:
-    export ANTHROPIC_API_KEY=your_key
-    python generate_dataset.py           # full run (~800 pairs)
-    python generate_dataset.py --test    # test run (10 pairs, verify quality first)
+    # Claude (default, uses ANTHROPIC_API_KEY)
+    python generate_dataset.py
+
+    # OpenAI (uses OPENAI_API_KEY)
+    python generate_dataset.py --provider openai
+
+    # Llama via Groq (uses GROQ_API_KEY, free at console.groq.com)
+    python generate_dataset.py --provider llama
+
+    # Test run (small batch to verify quality first)
+    python generate_dataset.py --provider openai --test
 """
 
-import anthropic
 import json
 import time
 import argparse
-import os
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load .env.local from the project directory
-load_dotenv(Path(__file__).parent / ".env.local")
+from llm_client import LLMClient
 
-client = anthropic.Anthropic()
-
-CHECKPOINT_FILE = "data/checkpoint.json"
-OUTPUT_FILE = "data/sycophancy_dpo_dataset.json"
-
-# Use Haiku — fast, cheap, fully capable for factual Q&A generation
-MODEL = "claude-haiku-4-5-20251001"
+# Set by main() before any generation functions run
+_client: LLMClient = None
 
 
-def call_api(prompt: str, max_tokens: int = 1000, retries: int = 3) -> str:
-    for attempt in range(retries):
-        try:
-            response = client.messages.create(
-                model=MODEL,
-                max_tokens=max_tokens,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return response.content[0].text.strip()
-        except anthropic.RateLimitError:
-            wait = 2 ** attempt * 5
-            print(f"  Rate limited, waiting {wait}s...")
-            time.sleep(wait)
-        except anthropic.APIError as e:
-            print(f"  API error (attempt {attempt+1}): {e}")
-            time.sleep(2)
-    raise RuntimeError(f"Failed after {retries} attempts")
+def call_api(prompt: str, max_tokens: int = 1000) -> str:
+    return _client.complete(prompt, max_tokens)
 
 
-def parse_json_response(text: str) -> any:
+def parse_json_response(text: str):
     """Extract JSON from response, handling markdown code fences."""
     text = text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
-        # drop first and last fence lines
         text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
     return json.loads(text)
 
 
 def generate_qa_pairs(n: int) -> list[dict]:
-    """Generate n factual Q&A pairs with unambiguous correct answers."""
     print(f"Generating {n} factual Q&A pairs...")
     prompt = f"""Generate {n} factual questions with clear, unambiguous correct answers.
 Cover a mix of domains: science, history, math, geography.
@@ -75,7 +57,6 @@ Return ONLY a JSON array, no other text:
 
 
 def generate_pushbacks(question: str, answer: str, n: int = 3) -> list[str]:
-    """Generate n pushback messages challenging the correct answer."""
     prompt = f"""Q: {question}
 A: {answer}
 
@@ -93,7 +74,6 @@ Return ONLY a JSON array of strings, no other text:
 
 
 def generate_preference_pair(question: str, answer: str, pushback: str) -> dict:
-    """Generate chosen (maintains answer) and rejected (capitulates) responses."""
     prompt = f"""A user asked a factual question. The model gave a correct answer. The user pushed back.
 
 Q: {question}
@@ -113,37 +93,34 @@ Return ONLY JSON, no other text:
     return parse_json_response(text)
 
 
-def load_checkpoint() -> dict:
-    if Path(CHECKPOINT_FILE).exists():
-        with open(CHECKPOINT_FILE) as f:
+def load_checkpoint(checkpoint_file: str) -> dict:
+    if Path(checkpoint_file).exists():
+        with open(checkpoint_file) as f:
             return json.load(f)
     return {"completed_qa_indices": [], "dataset": []}
 
 
-def save_checkpoint(state: dict):
-    with open(CHECKPOINT_FILE, "w") as f:
+def save_checkpoint(state: dict, checkpoint_file: str):
+    with open(checkpoint_file, "w") as f:
         json.dump(state, f)
 
 
-def build_dataset(n_qa: int = 80, pushbacks_per_qa: int = 3) -> list[dict]:
-    """
-    Build the full dataset with checkpointing.
-    Default: 80 Q&A pairs × 3 pushbacks = 240 preference pairs.
-    Run twice (or increase n_qa) to reach 800+.
-    """
+def build_dataset(provider: str, n_qa: int = 80, pushbacks_per_qa: int = 3) -> list[dict]:
     Path("data").mkdir(exist_ok=True)
-    state = load_checkpoint()
+
+    checkpoint_file = f"data/checkpoint_{provider}.json"
+    output_file = f"data/sycophancy_dpo_dataset_{provider}.json"
+    qa_cache_file = f"data/qa_pairs_{provider}.json"
+
+    state = load_checkpoint(checkpoint_file)
     dataset = state["dataset"]
     completed = set(state["completed_qa_indices"])
+    print(f"Checkpoint: {len(completed)} Q&A pairs done, {len(dataset)} preference pairs so far")
 
-    print(f"Checkpoint: {len(completed)} Q&A pairs already done, {len(dataset)} pairs in dataset")
-
-    # Generate Q&A pairs if we don't have them cached
-    qa_cache_file = "data/qa_pairs.json"
     if Path(qa_cache_file).exists():
         with open(qa_cache_file) as f:
             qa_pairs = json.load(f)
-        print(f"Loaded {len(qa_pairs)} Q&A pairs from cache")
+        print(f"Loaded {len(qa_pairs)} Q&A pairs from cache ({qa_cache_file})")
     else:
         qa_pairs = generate_qa_pairs(n_qa)
         with open(qa_cache_file, "w") as f:
@@ -154,13 +131,12 @@ def build_dataset(n_qa: int = 80, pushbacks_per_qa: int = 3) -> list[dict]:
         if i in completed:
             continue
 
-        question = qa["question"]
-        answer = qa["answer"]
+        question, answer = qa["question"], qa["answer"]
         print(f"\n[{i+1}/{total}] {question[:60]}...")
 
         try:
             pushbacks = generate_pushbacks(question, answer, n=pushbacks_per_qa)
-            time.sleep(0.3)  # small pause between calls
+            time.sleep(0.3)
 
             for j, pushback in enumerate(pushbacks):
                 pair = generate_preference_pair(question, answer, pushback)
@@ -169,7 +145,7 @@ def build_dataset(n_qa: int = 80, pushbacks_per_qa: int = 3) -> list[dict]:
                     "chosen": pair["chosen"],
                     "rejected": pair["rejected"],
                 })
-                print(f"  Pushback {j+1}: ✓  ({len(dataset)} pairs total)")
+                print(f"  Pushback {j+1}: ok  ({len(dataset)} pairs total)")
                 time.sleep(0.3)
 
         except (json.JSONDecodeError, KeyError) as e:
@@ -179,20 +155,22 @@ def build_dataset(n_qa: int = 80, pushbacks_per_qa: int = 3) -> list[dict]:
             print(f"  Error: {e}, saving checkpoint and exiting")
             state["completed_qa_indices"] = list(completed)
             state["dataset"] = dataset
-            save_checkpoint(state)
+            save_checkpoint(state, checkpoint_file)
             sys.exit(1)
 
         completed.add(i)
         state["completed_qa_indices"] = list(completed)
         state["dataset"] = dataset
-        save_checkpoint(state)
+        save_checkpoint(state, checkpoint_file)
 
+    with open(output_file, "w") as f:
+        json.dump(dataset, f, indent=2)
+    print(f"\nDone. {len(dataset)} pairs saved to {output_file}")
     return dataset
 
 
-def run_test():
-    """Generate 10 pairs and print them for quality review."""
-    print("=== TEST RUN — 3 Q&A pairs, 2 pushbacks each = ~6 pairs ===\n")
+def run_test(provider: str):
+    print(f"=== TEST RUN [{provider}] — 3 Q&A pairs, 2 pushbacks each ===\n")
     Path("data").mkdir(exist_ok=True)
 
     qa_pairs = generate_qa_pairs(3)
@@ -217,31 +195,28 @@ def run_test():
             time.sleep(0.5)
         print()
 
-    with open("data/test_pairs.json", "w") as f:
+    out = f"data/test_pairs_{provider}.json"
+    with open(out, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"\nSaved {len(results)} test pairs to data/test_pairs.json")
-    print("Review them — if quality looks good, run without --test for the full dataset.")
+    print(f"Saved {len(results)} test pairs to {out}")
+    print("If quality looks good, run without --test for the full dataset.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--test", action="store_true", help="Run a small test batch first")
+    parser.add_argument(
+        "--provider", choices=["claude", "openai", "llama"], default="claude",
+        help="LLM provider for dataset generation (default: claude)"
+    )
+    parser.add_argument("--test", action="store_true", help="Small test batch to verify quality first")
     parser.add_argument("--n-qa", type=int, default=80, help="Number of Q&A pairs (default: 80 → ~240 pairs)")
     parser.add_argument("--pushbacks", type=int, default=3, help="Pushbacks per Q&A (default: 3)")
     args = parser.parse_args()
 
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("Error: ANTHROPIC_API_KEY not set.")
-        print("Run: export ANTHROPIC_API_KEY=your_key_here")
-        sys.exit(1)
+    _client = LLMClient(args.provider)
+    print(f"Provider: {args.provider}  Model: {_client.model}\n")
 
     if args.test:
-        run_test()
+        run_test(args.provider)
     else:
-        dataset = build_dataset(n_qa=args.n_qa, pushbacks_per_qa=args.pushbacks)
-
-        with open(OUTPUT_FILE, "w") as f:
-            json.dump(dataset, f, indent=2)
-
-        print(f"\n✓ Done. {len(dataset)} preference pairs saved to {OUTPUT_FILE}")
-        print("Next: review a sample, then set up training (see train.py)")
+        build_dataset(args.provider, n_qa=args.n_qa, pushbacks_per_qa=args.pushbacks)
