@@ -41,7 +41,7 @@ image = (
     )
 )
 
-volume = modal.Volume.from_name("sycophancy-reduction-outputs", create_if_missing=False)
+volume = modal.Volume.from_name("sycophancy-reduction-outputs", create_if_missing=True)
 
 app = modal.App("sycophancy-cross-eval")
 
