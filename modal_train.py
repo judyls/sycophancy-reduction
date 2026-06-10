@@ -5,15 +5,19 @@ Setup (one-time):
     modal secret create huggingface-secret HF_TOKEN=hf_...
 
 Run:
+    # Train on Claude-generated dataset (original):
     modal run modal_train.py
+
+    # Train on OpenAI-generated dataset:
+    modal run modal_train.py --dataset data/sycophancy_dpo_dataset_openai.json --output-subdir dpo-run-openai
 
 Download adapter when done:
     modal volume get sycophancy-reduction-outputs /dpo-run ./adapter
+    modal volume get sycophancy-reduction-outputs /dpo-run-openai ./adapter_openai
 """
 
 import modal
 
-# PyTorch image with CUDA — bitsandbytes needs this
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("git")
@@ -31,20 +35,19 @@ image = (
     )
 )
 
-# Persistent volume — adapter survives after the function ends
 volume = modal.Volume.from_name("sycophancy-reduction-outputs", create_if_missing=True)
 
 app = modal.App("sycophancy-reduction-training")
 
 
 @app.function(
-    gpu="A10G",                                          # 24GB VRAM, ~$1.10/hr — fits 7B in 4-bit
+    gpu="A10G",
     image=image,
     secrets=[modal.Secret.from_name("huggingface-secret")],
     volumes={"/outputs": volume},
-    timeout=60 * 60 * 3,                                # 3hr ceiling
+    timeout=60 * 60 * 3,
 )
-def run_training():
+def run_training(dataset: str = "data/sycophancy_dpo_dataset.json", output_subdir: str = "dpo-run"):
     import subprocess
     import sys
     import os
@@ -57,13 +60,22 @@ def run_training():
     os.chdir("/app")
 
     from train import main
-    main(output_dir="/outputs/dpo-run", beta=0.1, epochs=3, batch_size=2)
+    main(
+        output_dir=f"/outputs/{output_subdir}",
+        beta=0.1,
+        epochs=3,
+        batch_size=2,
+        data_file=dataset,
+    )
 
     volume.commit()
-    print("\nAdapter saved to Modal volume: sycophancy-reduction-outputs/dpo-run")
-    print("Download with: modal volume get sycophancy-reduction-outputs /dpo-run ./adapter")
+    print(f"\nAdapter saved to Modal volume: sycophancy-reduction-outputs/{output_subdir}")
+    print(f"Download: modal volume get sycophancy-reduction-outputs /{output_subdir} ./adapter_{output_subdir}")
 
 
 @app.local_entrypoint()
-def main():
-    run_training.remote()
+def main(
+    dataset: str = "data/sycophancy_dpo_dataset.json",
+    output_subdir: str = "dpo-run",
+):
+    run_training.remote(dataset=dataset, output_subdir=output_subdir)

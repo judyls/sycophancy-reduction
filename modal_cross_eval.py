@@ -53,7 +53,6 @@ app = modal.App("sycophancy-cross-eval")
         modal.Secret.from_name("huggingface-secret"),
         modal.Secret.from_name("anthropic-secret"),
         modal.Secret.from_name("openai-secret"),
-        modal.Secret.from_name("groq-secret"),
     ],
     volumes={"/outputs": volume},
     timeout=60 * 60 * 4,
@@ -69,7 +68,7 @@ def run_cross_eval(
     import os
 
     if judges is None:
-        judges = ["claude", "openai", "llama"]
+        judges = ["claude", "openai"]
 
     subprocess.run(
         ["git", "clone", "https://github.com/judyls/sycophancy-reduction.git", "/app"],

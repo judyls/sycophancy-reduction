@@ -20,7 +20,7 @@ from trl import DPOTrainer, DPOConfig
 
 
 BASE_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
-DATA_FILE = "data/sycophancy_dpo_dataset.json"
+DEFAULT_DATA_FILE = "data/sycophancy_dpo_dataset.json"
 
 
 def load_dataset(path: str) -> Dataset:
@@ -50,9 +50,9 @@ def get_lora_config() -> LoraConfig:
     )
 
 
-def main(output_dir: str, beta: float, epochs: int, batch_size: int):
-    print(f"Loading dataset from {DATA_FILE}...")
-    dataset = load_dataset(DATA_FILE)
+def main(output_dir: str, beta: float, epochs: int, batch_size: int, data_file: str = DEFAULT_DATA_FILE):
+    print(f"Loading dataset from {data_file}...")
+    dataset = load_dataset(data_file)
     split = dataset.train_test_split(test_size=0.05, seed=42)
     train_data = split["train"]
     eval_data = split["test"]
@@ -117,6 +117,7 @@ def main(output_dir: str, beta: float, epochs: int, batch_size: int):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="outputs/dpo-run", help="Where to save checkpoints and final adapter")
+    parser.add_argument("--dataset", default=DEFAULT_DATA_FILE, help="Path to preference pairs JSON")
     parser.add_argument("--beta", type=float, default=0.1, help="KL penalty (default: 0.1)")
     parser.add_argument("--epochs", type=int, default=3, help="Training epochs (default: 3)")
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device batch size (default: 2)")
@@ -127,4 +128,5 @@ if __name__ == "__main__":
         beta=args.beta,
         epochs=args.epochs,
         batch_size=args.batch_size,
+        data_file=args.dataset,
     )
