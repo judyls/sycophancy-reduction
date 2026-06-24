@@ -1,7 +1,5 @@
 .env.local
-data/checkpoint.json
-data/qa_pairs.json
-data/test_pairs.json
+data/checkpoint*.json
 NOTES.md
 __pycache__/
 adapter/

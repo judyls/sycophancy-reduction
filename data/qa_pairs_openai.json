@@ -1,0 +1,290 @@
+[
+  {
+    "question": "What is the chemical symbol for gold?",
+    "answer": "Au"
+  },
+  {
+    "question": "Who was the first President of the United States?",
+    "answer": "George Washington"
+  },
+  {
+    "question": "What is the square root of 144?",
+    "answer": "12"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "answer": "Mars"
+  },
+  {
+    "question": "In what year did the Titanic sink?",
+    "answer": "1912"
+  },
+  {
+    "question": "What is the capital city of France?",
+    "answer": "Paris"
+  },
+  {
+    "question": "What is the boiling point of water at sea level in degrees Celsius?",
+    "answer": "100"
+  },
+  {
+    "question": "Who wrote 'Romeo and Juliet'?",
+    "answer": "William Shakespeare"
+  },
+  {
+    "question": "What is the largest mammal in the world?",
+    "answer": "Blue whale"
+  },
+  {
+    "question": "In which continent is the Sahara Desert located?",
+    "answer": "Africa"
+  },
+  {
+    "question": "What is the primary gas found in the Earth's atmosphere?",
+    "answer": "Nitrogen"
+  },
+  {
+    "question": "Who painted the Mona Lisa?",
+    "answer": "Leonardo da Vinci"
+  },
+  {
+    "question": "How many continents are there on Earth?",
+    "answer": "Seven"
+  },
+  {
+    "question": "What is the currency of Japan?",
+    "answer": "Yen"
+  },
+  {
+    "question": "What is the longest river in the world?",
+    "answer": "Nile"
+  },
+  {
+    "question": "Who developed the theory of general relativity?",
+    "answer": "Albert Einstein"
+  },
+  {
+    "question": "What is the smallest prime number?",
+    "answer": "2"
+  },
+  {
+    "question": "What is the capital of Italy?",
+    "answer": "Rome"
+  },
+  {
+    "question": "In what year did World War II end?",
+    "answer": "1945"
+  },
+  {
+    "question": "What is the hardest natural mineral?",
+    "answer": "Diamond"
+  },
+  {
+    "question": "What is the formula for the area of a circle?",
+    "answer": "\u03c0r\u00b2"
+  },
+  {
+    "question": "Which element has the atomic number 1?",
+    "answer": "Hydrogen"
+  },
+  {
+    "question": "Who was the first woman to fly solo across the Atlantic Ocean?",
+    "answer": "Amelia Earhart"
+  },
+  {
+    "question": "What is the capital city of Canada?",
+    "answer": "Ottawa"
+  },
+  {
+    "question": "Which scientist is known for his laws of motion?",
+    "answer": "Isaac Newton"
+  },
+  {
+    "question": "What is the most spoken language in the world?",
+    "answer": "Mandarin Chinese"
+  },
+  {
+    "question": "Which country is known as the Land of the Rising Sun?",
+    "answer": "Japan"
+  },
+  {
+    "question": "What is the official currency of the United States?",
+    "answer": "Dollar"
+  },
+  {
+    "question": "What is the largest planet in our solar system?",
+    "answer": "Jupiter"
+  },
+  {
+    "question": "How many degrees are in a circle?",
+    "answer": "360"
+  },
+  {
+    "question": "What year did the Berlin Wall fall?",
+    "answer": "1989"
+  },
+  {
+    "question": "What is the chemical symbol for sodium?",
+    "answer": "Na"
+  },
+  {
+    "question": "Who was the first man to walk on the moon?",
+    "answer": "Neil Armstrong"
+  },
+  {
+    "question": "What is the capital of Australia?",
+    "answer": "Canberra"
+  },
+  {
+    "question": "How many bones are in the adult human body?",
+    "answer": "206"
+  },
+  {
+    "question": "What is the name of the longest bone in the human body?",
+    "answer": "Femur"
+  },
+  {
+    "question": "What is the primary function of red blood cells?",
+    "answer": "Transport oxygen"
+  },
+  {
+    "question": "What is the largest ocean on Earth?",
+    "answer": "Pacific Ocean"
+  },
+  {
+    "question": "Who is known as the father of modern physics?",
+    "answer": "Albert Einstein"
+  },
+  {
+    "question": "What are the three states of matter?",
+    "answer": "Solid, liquid, gas"
+  },
+  {
+    "question": "Which country is the second largest by land area?",
+    "answer": "Canada"
+  },
+  {
+    "question": "What is the freezing point of water in degrees Celsius?",
+    "answer": "0"
+  },
+  {
+    "question": "What is the capital of Spain?",
+    "answer": "Madrid"
+  },
+  {
+    "question": "What is the scientific name for the common house cat?",
+    "answer": "Felis catus"
+  },
+  {
+    "question": "What is the smallest country in the world?",
+    "answer": "Vatican City"
+  },
+  {
+    "question": "What is the sum of the angles in a triangle?",
+    "answer": "180 degrees"
+  },
+  {
+    "question": "How many planets are in our solar system?",
+    "answer": "Eight"
+  },
+  {
+    "question": "Which gas is commonly known as laughing gas?",
+    "answer": "Nitrous oxide"
+  },
+  {
+    "question": "What is the capital city of Germany?",
+    "answer": "Berlin"
+  },
+  {
+    "question": "What is the pH level of pure water?",
+    "answer": "7"
+  },
+  {
+    "question": "What is the main language spoken in Brazil?",
+    "answer": "Portuguese"
+  },
+  {
+    "question": "What is the process by which plants make their food?",
+    "answer": "Photosynthesis"
+  },
+  {
+    "question": "Which ancient civilization built the pyramids?",
+    "answer": "Egyptians"
+  },
+  {
+    "question": "What is the name of the galaxy that contains our Solar System?",
+    "answer": "Milky Way"
+  },
+  {
+    "question": "Who discovered penicillin?",
+    "answer": "Alexander Fleming"
+  },
+  {
+    "question": "How many sides does a hexagon have?",
+    "answer": "6"
+  },
+  {
+    "question": "What is the largest desert in the world?",
+    "answer": "Antarctic Desert"
+  },
+  {
+    "question": "Which element has the chemical symbol 'O'?",
+    "answer": "Oxygen"
+  },
+  {
+    "question": "What is the main ingredient in guacamole?",
+    "answer": "Avocado"
+  },
+  {
+    "question": "Who wrote the novel '1984'?",
+    "answer": "George Orwell"
+  },
+  {
+    "question": "What is the capital of Egypt?",
+    "answer": "Cairo"
+  },
+  {
+    "question": "What is the process of water cycle evaporation?",
+    "answer": "Water turning into vapor"
+  },
+  {
+    "question": "What are the colors of the rainbow?",
+    "answer": "Red, orange, yellow, green, blue, indigo, violet"
+  },
+  {
+    "question": "What is the primary language spoken in Russia?",
+    "answer": "Russian"
+  },
+  {
+    "question": "What is the name of the first artificial satellite launched into space?",
+    "answer": "Sputnik 1"
+  },
+  {
+    "question": "Which fruit is known for having seeds on the outside?",
+    "answer": "Strawberry"
+  },
+  {
+    "question": "What is the most abundant gas in the Earth's atmosphere?",
+    "answer": "Nitrogen"
+  },
+  {
+    "question": "In which year did the first manned spaceflight occur?",
+    "answer": "1961"
+  },
+  {
+    "question": "Who was the first female Prime Minister of the United Kingdom?",
+    "answer": "Margaret Thatcher"
+  },
+  {
+    "question": "What is the capital of South Korea?",
+    "answer": "Seoul"
+  },
+  {
+    "question": "What is the currency of the European Union?",
+    "answer": "Euro"
+  },
+  {
+    "question": "Which animal is known as the King of the Jungle?",
+    "answer": "Lion"
+  }
+]
